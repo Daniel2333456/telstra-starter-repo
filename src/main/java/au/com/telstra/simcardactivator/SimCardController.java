@@ -1,10 +1,7 @@
 package au.com.telstra.simcardactivator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/activate")
 public class SimCardController {
 
     private final String actuatorUrl = "http://localhost:8444/actuate";
@@ -21,7 +17,8 @@ public class SimCardController {
     @Autowired
     private SimCardRepository simCardRepository;
 
-    @PostMapping
+    // POST /activate
+    @PostMapping("/activate")
     public ResponseEntity<String> activateSimCard(@RequestBody Map<String, String> requestBody) {
         String iccid = requestBody.get("iccid");
         String customerEmail = requestBody.get("customerEmail");
@@ -33,6 +30,7 @@ public class SimCardController {
         RestTemplate restTemplate = new RestTemplate();
         Map<String, String> payload = new HashMap<>();
         payload.put("iccid", iccid);
+        payload.put("customerEmail", customerEmail);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -58,8 +56,9 @@ public class SimCardController {
         }
     }
 
-    @GetMapping("/simCardId")
-    public ResponseEntity<?> getSimCardById(@RequestParam Long simCardId) {
+    // GET /simCard/{id}
+    @GetMapping("/simCard/{id}")
+    public ResponseEntity<?> getSimCardById(@PathVariable("id") Long simCardId) {
         Optional<SimCardRecord> optional = simCardRepository.findById(simCardId);
         if (optional.isPresent()) {
             SimCardRecord record = optional.get();
